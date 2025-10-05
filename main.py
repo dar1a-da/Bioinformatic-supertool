@@ -69,5 +69,3 @@ def run_dna_rna_tools(*args):
     if len(results) == 1:
         return results[0]
     return results
-
-print(run_dna_rna_tools('TTUU', 'is_nucleic_acid'))
