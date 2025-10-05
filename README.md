@@ -26,7 +26,7 @@ run_dna_rna_tools('ctA', 'complement') # 'gaT'
 run_dna_rna_tools('ATg', 'reverse_complement') # 'cAT'
 ```
 
-## Функция filter_fastq
+## Функция `filter_fastq`
 
 Работает с последовательностями формата **fastq**. Позволяет фильтровать их по GC-составу, длине прочтения, качеству рида по шкале Phred33.
 
