@@ -47,9 +47,32 @@ def filter_fastq(
 
 
 
-def run_dna_rna_tools(*args):
+def run_dna_rna_tools(*args: str) -> bool | list[bool] | str | list[str]:
+    """
+    Perform basic DNA/RNA sequence operations.
+
+    This function check if strings are nucleotide sequences, 
+    return their transcribed, reverse, complementary, or reverse-complementary forms.
+
+    Parameters:
+    *args : str
+        Variable number of arguments.
+        All arguments except the last one are nucleotide sequences (str),
+        the last argument specifies the operation:
+        - 'is_nucleic_acid'
+        - 'transcribe'
+        - 'reverse'
+        - 'complement'
+        - 'reverse_complement'
+
+    Returns:
+    bool or list[bool] or str or list[str]
+        - If process is 'is_nucleic_acid': returns bool or list[bool].
+        - Otherwise: returns the resulting sequence(s) as str or list[str].
+    """
     *sequences, process = args
     results = []
+    
     for seq in sequences:
         if process == 'is_nucleic_acid':
             results.append(check_nucleic_acid(seq))
