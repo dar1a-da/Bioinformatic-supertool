@@ -1,11 +1,12 @@
 from data import seqs
+import os
 from utils.module_filter_fastq import *
 from utils.module_dna_rna_tools import *
+from utils.module_IO_fastq import *
 
 def filter_fastq(
-        seqs: dict[str, tuple[str, str]] = {
-            'id1': ('ATGC', 'IIII')
-        }, 
+        input_file,
+        output_fastq,
         gc_bounds: tuple[float, float] | float = (0,100),
         length_bounds: tuple[int, int] | float = (0,2**32),
         quality_threshold: float = 0
@@ -23,8 +24,9 @@ def filter_fastq(
     dict[str, tuple[str, str]]
     dict filter sequences
     """
+    seqs = read_fastq(input_file)
     result = {}
-    for key, (seq, quality) in seqs.items():
+    for key, (seq, plus, quality) in seqs.items():
         if isinstance(gc_bounds, tuple):
             gc_res = (gc_bounds[0] <= content_gc(seq)) and (gc_bounds[1] >= content_gc(seq))
         else:
@@ -41,10 +43,10 @@ def filter_fastq(
             phr_res == True
 
         if gc_res and len_res and phr_res:
-            result[key] = seq, quality
+            result[key] = seq, plus, quality
     
+    write_fastq(result, output_fastq)
     return result
-
 
 
 def run_dna_rna_tools(*args: str) -> bool | list[bool] | str | list[str]:
@@ -92,3 +94,8 @@ def run_dna_rna_tools(*args: str) -> bool | list[bool] | str | list[str]:
     if len(results) == 1:
         return results[0]
     return results
+
+
+
+filter_fastq(input_file='data/example_fastq2.fastq', output_fastq='filt')
+
