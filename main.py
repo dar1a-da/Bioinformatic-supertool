@@ -1,11 +1,11 @@
-from data import seqs
+#from data import seqs
 import os
 from utils.module_filter_fastq import *
 from utils.module_dna_rna_tools import *
 from utils.module_IO_fastq import *
 
 def filter_fastq(
-        input_file,
+        input_fastq,
         output_fastq,
         gc_bounds: tuple[float, float] | float = (0,100),
         length_bounds: tuple[int, int] | float = (0,2**32),
@@ -24,7 +24,7 @@ def filter_fastq(
     dict[str, tuple[str, str]]
     dict filter sequences
     """
-    seqs = read_fastq(input_file)
+    seqs = read_fastq(input_fastq)
     result = {}
     for key, (seq, plus, quality) in seqs.items():
         if isinstance(gc_bounds, tuple):
@@ -97,5 +97,5 @@ def run_dna_rna_tools(*args: str) -> bool | list[bool] | str | list[str]:
 
 
 
-filter_fastq(input_file='data/example_fastq2.fastq', output_fastq='filt')
+filter_fastq(input_fastq='data/example_fastq2.fastq', output_fastq='filt')
 

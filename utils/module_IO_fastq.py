@@ -2,7 +2,7 @@ import os
 
 def read_fastq(file_fastq: str) -> dict[str, tuple[str, str]]:
     """
-    Читает и преобразовывает в словарь (парсит) содержимое fastq файла
+    Reads and converts in dict (parse) fastq file
 
     :param file_fastq: Путь до файла с NGS разметкой
     :return seqs: Словарь секса
