@@ -25,3 +25,7 @@ def write_fastq(seqs, file):
     with open(os.path.join('filtered',file), mode='w') as file:
         for i in seqs.keys():
             file.write(i+'\n'+seqs[i][0]+'\n'+seqs[i][1]+'\n'+seqs[i][2]+'\n')
+
+def write_file(result, file):
+    with open(os.path.join('filtered', file), mode='w') as file:
+        file.writelines(result)
