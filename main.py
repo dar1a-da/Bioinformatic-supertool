@@ -96,6 +96,3 @@ def run_dna_rna_tools(*args: str) -> bool | list[bool] | str | list[str]:
     return results
 
 
-
-filter_fastq(input_fastq='data/example_fastq2.fastq', output_fastq='filt')
-

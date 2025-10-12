@@ -4,8 +4,8 @@ def read_fastq(file_fastq: str) -> dict[str, tuple[str, str]]:
     """
     Reads and converts in dict (parse) fastq file
 
-    :param file_fastq: Путь до файла с NGS разметкой
-    :return seqs: Словарь секса
+    :param file_fastq: Path to file
+    :return seqs: Dict
     """
     with open(file_fastq) as file:
         lines = file.readlines()
@@ -20,12 +20,12 @@ def read_fastq(file_fastq: str) -> dict[str, tuple[str, str]]:
 
     return seqs
 
-def write_fastq(seqs, file):
+def write_fastq(seqs: dict, file: str) -> None:
     os.makedirs('filtered', exist_ok=True)
     with open(os.path.join('filtered',file), mode='w') as file:
         for i in seqs.keys():
             file.write(i+'\n'+seqs[i][0]+'\n'+seqs[i][1]+'\n'+seqs[i][2]+'\n')
 
-def write_file(result, file):
+def write_file(result: str, file: str) -> None:
     with open(os.path.join('filtered', file), mode='w') as file:
         file.writelines(result)

@@ -1,8 +1,13 @@
-import data
 from utils.module_IO_fastq import write_file
-import os
 
-def convert_multiline_fasta_to_oneline(input_fasta, output_fasta=''):
+def convert_multiline_fasta_to_oneline(input_fasta: str, output_fasta: str ='') -> list[str]:
+    """
+    Convert multiline fasta to oneline fasta
+    
+    :param input_fasta: input file fasta multiline seqs;
+    :param output_fasta: output file fasta oneline seqs;
+    :return: list of lines 
+    """
     with open(input_fasta) as file:
         lines = file.readlines()
         result = []
@@ -23,7 +28,13 @@ def convert_multiline_fasta_to_oneline(input_fasta, output_fasta=''):
     return result        
 
 
-def parse_blast_output(input_file, output_file):
+def parse_blast_output(input_file: str, output_file: str) -> None:
+    """
+    Reads a txt file, selects the first row from the Description column for each QUERY. Saves proteins to a new file in one column.
+
+    :param input_fasta: input txt blast file;
+    :param output_fasta: output txt proteins;
+    """
     with open(input_file) as file:
         lines = file.readlines()
         lst_description = []
