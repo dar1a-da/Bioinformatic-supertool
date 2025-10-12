@@ -1,8 +1,6 @@
-#from data import seqs
-import os
-from utils.module_filter_fastq import *
-from utils.module_dna_rna_tools import *
-from utils.module_IO_fastq import *
+from utils.module_IO_fastq import read_fastq, write_fastq
+from utils.module_filter_fastq import content_gc, quality_read, compare
+from utils.module_dna_rna_tools import check_nucleic_acid, transcribe_nucleic_acid, reverse_nucleic_acid, complement_nucleic_acid, reverse_complement_nucleic_acid
 
 def filter_fastq(
         input_fastq,
@@ -26,16 +24,9 @@ def filter_fastq(
     """
     seqs = read_fastq(input_fastq)
     result = {}
-    for key, (seq, plus, quality) in seqs.items():
-        if isinstance(gc_bounds, tuple):
-            gc_res = (gc_bounds[0] <= content_gc(seq)) and (gc_bounds[1] >= content_gc(seq))
-        else:
-            gc_res = content_gc(seq) <= gc_bounds
-
-        if isinstance(length_bounds, tuple):
-            len_res = (length_bounds[0] <= len(seq)) and (length_bounds[1] >= len(seq))
-        else:
-            len_res = len(seq) <= length_bounds
+    for idname, (seq, quality) in seqs.items():
+        gc_res = compare(gc_bounds,seq,content_gc)
+        len_res = compare(length_bounds,seq,len)
 
         if quality_threshold is not None:
             phr_res = quality_threshold <= quality_read(quality)
@@ -43,7 +34,7 @@ def filter_fastq(
             phr_res == True
 
         if gc_res and len_res and phr_res:
-            result[key] = seq, plus, quality
+            result[idname] = seq, quality
     
     write_fastq(result, output_fastq)
     return result
@@ -75,24 +66,22 @@ def run_dna_rna_tools(*args: str) -> bool | list[bool] | str | list[str]:
     *sequences, process = args
     results = []
     
+    operations = {
+    "is_nucleic_acid": check_nucleic_acid,
+    "transcribe": transcribe_nucleic_acid,
+    "reverse": reverse_nucleic_acid,
+    "complement": complement_nucleic_acid,
+    "reverse_complement": reverse_complement_nucleic_acid
+    }
+    
+    results = []
     for seq in sequences:
-        if process == 'is_nucleic_acid':
-            results.append(check_nucleic_acid(seq))
-
-        elif process == 'transcribe' and check_nucleic_acid(seq):
-            results.append(transcribe_nucleic_acid(seq))
-
-        elif process == 'reverse' and check_nucleic_acid(seq):
-            results.append(reverse_nucleic_acid(seq))
-
-        elif process == 'complement' and check_nucleic_acid(seq):
-            results.append(complement_nucleic_acid(seq))
-
-        elif process == 'reverse_complement' and check_nucleic_acid(seq):
-            results.append(reverse_complement_nucleic_acid(seq))
-
+        func = operations.get(process)
+        if process == "is_nucleic_acid":
+            results.append(func(seq))
+        elif func and check_nucleic_acid(seq):
+            results.append(func(seq))
+        
     if len(results) == 1:
         return results[0]
     return results
-
-

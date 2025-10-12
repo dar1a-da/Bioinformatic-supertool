@@ -22,3 +22,8 @@ def quality_read(qual: str = 'IIII') -> float:
     """
     phr = [ord(el) - 33 for el in qual]
     return sum(phr) / len(phr)
+
+def compare(bounds: tuple | int, seq: dict, func: str) -> bool:
+    lower, upper = bounds\
+        if isinstance(bounds, tuple) else (0, bounds)
+    return lower <= func(seq) <= upper
