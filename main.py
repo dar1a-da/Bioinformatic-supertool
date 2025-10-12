@@ -1,11 +1,10 @@
-from data import seqs
+from utils.module_IO_fastq import read_fastq, write_fastq
 from utils.module_filter_fastq import content_gc, quality_read, compare
 from utils.module_dna_rna_tools import check_nucleic_acid, transcribe_nucleic_acid, reverse_nucleic_acid, complement_nucleic_acid, reverse_complement_nucleic_acid
 
 def filter_fastq(
-        seqs: dict[str, tuple[str, str]] = {
-            'id1': ('ATGC', 'IIII')
-        }, 
+        input_fastq,
+        output_fastq,
         gc_bounds: tuple[float, float] | float = (0,100),
         length_bounds: tuple[int, int] | float = (0,2**32),
         quality_threshold: float = 0
@@ -23,6 +22,7 @@ def filter_fastq(
     dict[str, tuple[str, str]]
     dict filter sequences
     """
+    seqs = read_fastq(input_fastq)
     result = {}
     for idname, (seq, quality) in seqs.items():
         gc_res = compare(gc_bounds,seq,content_gc)
@@ -36,6 +36,7 @@ def filter_fastq(
         if gc_res and len_res and phr_res:
             result[idname] = seq, quality
     
+    write_fastq(result, output_fastq)
     return result
 
 
