@@ -1,25 +1,25 @@
 # Bioinformatic-supertool
 
-В данном репозитории собраны инструменты для работы с нуклеотидными последовательностями.
+This repository contains tools for working with nucleotide sequences.
 
-**Точкой входа** в программу является файл `main.py`, в котором реализованы вызовы основных функций.
+**The entry point** to the program is a file `main.py `, which implements calls to the main functions.
 
-Скрипт `bio_files_processor.py` в котором реализованы функции `convert_multiline_fasta_to_oneline`, `parse_blast_output`.
+The script `bio_files_processor.py` in which the functions `convert_multiline_fasta_to_oneline`, `parse_blast_output` are realized.
 
-- В папке `data` файл с fasta последовательностями (`example_multiline_fasta.fasta`), файл с последовательностями формата fastq: название, последовательность, "+" строка, строка качества (`example_fastq.fastq`), файл с результатом бласта (`example_blast_result.txt`), файл (`example_gbk.gbk`).
-- В папке `utils` находятся модули с дополнительными функциями (`module_*.py`).
-- В папке `filtered` хранятся результаты функций `filter_fastq` (**filt**), `convert_multiline_fasta_to_oneline` (**one_line.fasta**), `parse_blast_output` (**proteins.txt**).
+- In folder `data` file with fasta sequences (`example_multiline_fasta.fasta`), a file with fastq format sequences: name, sequences, "+" string, string quality (`example_fastq.fastq`), file with blast result (`example_blast_result.txt`), file (`example_gbk.gbk`).
+- In folder `utils` there are modules with additional functions (`module_*.py`).
+- In folder `filtered` function results are stored `filter_fastq` (**filt**), `convert_multiline_fasta_to_oneline` (**one_line.fasta**), `parse_blast_output` (**proteins.txt**).
 
-## Функция `dna_rna_tools`
+## Function `dna_rna_tools`
 
-Позволяет выполнять базовые операции с последовательности ДНК/РНК:
-- проверять является ли строка нуклеотидной последовательность;
-- возвращать транскрибированную, обратную, комплементарную, обратную комплементарную последовательность.
+Function allows to perform basic operations with the DNA/RNA sequence:
+- check whether the string is a nucleotide sequence;
+- return the transcribed, reverse, complementary, reverse complementary sequence.
 
-Функция **dna_rna_tools** принимает на вход произвольное количество последовательностей нуклеотидов (`str`) и тип процесса, который надо произвести над последовательностями (`str`), 
-`process` — тип операции (`"is_nucleic_acid"`, `"transcribe"`, `"reverse"`, `"complement"`, `"reverse_complement"`).
+The **dna_rna_tools** function accepts an arbitrary number of nucleotide sequences (`str`) and the type of process to be performed on the sequences (`str`),
+`process` — type of operation (`"is_nucleic_acid"`, `"transcribe"`, `"reverse"`, `"complement"`, `"reverse_complement"`).
 
-**Пример использования**
+**Usage Example**
 
 ```python
 run_dna_rna_tools('ATGC', 'is_nucleic_acid') # True
@@ -29,18 +29,18 @@ run_dna_rna_tools('ctA', 'complement') # 'gaT'
 run_dna_rna_tools('ATg', 'reverse_complement') # 'cAT'
 ```
 
-## Функция `filter_fastq`
+## Function `filter_fastq`
 
-Работает с последовательностями формата **fastq**. Позволяет фильтровать их по GC-составу, длине прочтения, качеству рида по шкале Phred33.
+Function works with sequences in the **fastq** format. Allows to filter them by GC composition, reading length, and read quality on the Phred33 scale.
 
-Функция **filter_fastq** принимает на вход 5 аргументов:
-1. название файла с последовательностями формата fastq. 
-2. название файла куда будет записан результат.
-3. интервал (кортеж из двух значений) или значение (`float`) GC состава (в процентах) для фильтрации. В случае одной границы фильтруются (сохраняются) все риды ниже этой границы.
-4. интервал (кортеж из двух значений) или значение (`float`) длины рида для фильтрации. В случае одной границы фильтруются все риды ниже этой границы.
-5. пороговое значение среднего качества рида для фильтрации (`int`). Риды с качеством ниже порогового значения отбрасываются.
+The **filter_fastq** function accepts 5 arguments as input:
+1. The name of the file with fastq format sequences.
+2. The name of the file where the result will be recorded.
+3. Interval (tuple of two values) or GC value (`float') of the composition (in percent) for filtering. In the case of a single border, all reads below this border are filtered (saved).
+4. The interval (tuple of two values) or the value (`float`) of the reed length for filtering. In the case of a single border, all reads below that border are filtered.
+5. The threshold value of the average read quality for filtering (`int`). Reads with quality below the threshold value are discarded.
 
-Сохраняет строки fastq-сиквенсов, отфильтрованных по заданным параметрам.
+Saves fastq sequence strings filtered by the set parameters.
 
 ```python
 filter_fastq(
@@ -51,26 +51,26 @@ filter_fastq(
     quality_threshold: float = 0)
 ```
 
-**Пример использования**
+**Usage Example**
 ```python
 filter_fastq('input_fastq', 'output_fastq', gc_bounds = (0,100),        length_bounds = (0,2**32), quality_threshold = 0)
 ```
 
-## Функция `convert_multiline_fasta_to_oneline`
+## Function `convert_multiline_fasta_to_oneline`
 
-Читает поданный на вход fasta-файл, в котором последовательность (ДНК/РНК/белка) может быть разбита на несколько строк, после чего сохраняет в новый fasta-файл в котором каждая последовательность умещается в одну строку. 
+Function reads the input fasta file, in which the sequence (DNA/RNA/protein) can be split into several lines, and then saves it to a new fasta file in which each sequence fits into one line.
 
-Принимает на вход 2 аргумента (input_fasta и output_fasta). output_fasta необязательный аргумент, если не указан, возвращает список.
+Accepts 2 arguments as input (input_fasta and output_fasta). output_fasta optional argument, if not specified, returns a list.
 
 ```python
 convert_multiline_fasta_to_oneline(input_fasta: str, output_fasta: str ='') -> list[str]
 ```
 
-##  Функция `parse_blast_output`
+## Function `parse_blast_output`
 
-Программа читает заданный txt файл, для каждого запроса QUERY (абзац Sequences producing significant alignments:), выбирает первую строку из столбца Description. Набор полученных белков сохраняет в алфавитном порядке в новый файл.
+The program reads the preset txt file, selects the first row from the Description column for each QUERY (paragraph Sequences producing significant alignments:). The set of obtained proteins is saved in alphabetical order to a new file.
 
-Принимает на вход 2 аргумента (input_file, output_file). 
+Accepts 2 arguments as input (input_file, output_file). 
 
 ```python
 parse_blast_output(input_file: str, output_file: str) -> None

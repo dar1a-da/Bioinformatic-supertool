@@ -24,7 +24,7 @@ def filter_fastq(
     """
     seqs = read_fastq(input_fastq)
     result = {}
-    for idname, (seq, quality) in seqs.items():
+    for idname, (seq, plus, quality) in seqs.items():
         gc_res = compare(gc_bounds,seq,content_gc)
         len_res = compare(length_bounds,seq,len)
 
@@ -34,7 +34,7 @@ def filter_fastq(
             phr_res == True
 
         if gc_res and len_res and phr_res:
-            result[idname] = seq, quality
+            result[idname] = (seq, plus, quality)
     
     write_fastq(result, output_fastq)
     return result
