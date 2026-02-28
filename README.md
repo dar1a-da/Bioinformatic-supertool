@@ -2,76 +2,96 @@
 
 This repository contains tools for working with nucleotide sequences.
 
-**The entry point** to the program is a file `main.py `, which implements calls to the main functions.
+## Content
+- Requirements
+- Classes
+  - InvalidAlphabetError
+  - BiologicalSequence
+  - NucleicAcidSequence
+  - DNASequence
+  - RNASequence
+  - AminoAcidSequence
+- Function filter_fastq
+- Usage examples
 
-The script `bio_files_processor.py` in which the functions `convert_multiline_fasta_to_oneline`, `parse_blast_output` are realized.
+## Requirements
+- Python 3.10+
+- Biopython 1.86
 
-- In folder `data` file with fasta sequences (`example_multiline_fasta.fasta`), a file with fastq format sequences: name, sequences, "+" string, string quality (`example_fastq.fastq`), file with blast result (`example_blast_result.txt`), file (`example_gbk.gbk`).
-- In folder `utils` there are modules with additional functions (`module_*.py`).
-- In folder `filtered` function results are stored `filter_fastq` (**filt**), `convert_multiline_fasta_to_oneline` (**one_line.fasta**), `parse_blast_output` (**proteins.txt**).
+## Classes
+### InvalidAlphabetError
+A custom exception (the successor of ValueError) that is thrown when invalid characters are found in the sequence.
+Occurs:
+When creating a sequence object (DNASequence("ATBX")),
+When you call check_alphabet()
 
-## Function `dna_rna_tools`
+### BiologicalSequence
+An abstract base class that captures a common interface.
+Records:
+len(obj) — the length of the sequence  
+indexing obj[i] — character by index  
+slices of obj[i:j] — returns an object of the same class  
+beautiful output via __str__ and __repr__  
+check_alphabet() method (required for heirs)  
+Fields:  
+seq: str — string with sequence  
+ALPHABET: ClassVar[frozenset[str]] — valid alphabet (set in the heirs)
 
-Function allows to perform basic operations with the DNA/RNA sequence:
-- check whether the string is a nucleotide sequence;
-- return the transcribed, reverse, complementary, reverse complementary sequence.
+### NucleicAcidSequence
+The base class for nucleic acids. The heir of BiologicalSequence.  
+Implements:
+check_alphabet() — alphabet check (uses ALPHABET heir),  
+complement() — complementary sequence (polymorphically via COMPLEMENT_MAP),  
+reverse() — the reverse sequence,  
+reverse_complement() — reverse complement.  
+Important:  
+Polymorphism is implemented via the COMPLEMENT_MAP class attribute.  
+The complement() method does not contain if DNA/RNA conditions, and returns an object of the desired type.
 
-The **dna_rna_tools** function accepts an arbitrary number of nucleotide sequences (`str`) and the type of process to be performed on the sequences (`str`),
-`process` — type of operation (`"is_nucleic_acid"`, `"transcribe"`, `"reverse"`, `"complement"`, `"reverse_complement"`).
+### DNASequence
+The successor of NucleicAcidSequence for DNA.
+transcribe() — transcribes DNA into RNA and returns RNASequence.
 
-**Usage Example**
+### RNASequence
+The successor of NucleicAcidSequence for RNA.
 
+### AminoAcidSequence
+A class for amino acid sequences. The heir of BiologicalSequence.
+Implements:  
+check_alphabet() — checking the amino acid alphabet  
+translate_aa(nuc, frame=0, stop_at_stop=True, unknown="X") is a class-method for translating DNA/RNA into protein  
+Broadcast Parameters:  
+frame: 0/1/2 — offset of the reading frame  
+stop_at_stop: if True, stop at the first stop code. *  
+unknown: character for an unknown codon (default is "X")  
+Returns: the AminoAcidSequence object.
+
+## Function filter_fastq (Biopython)
+Filters reads in FASTQ by:  
+length (length_bounds)  
+average Phred quality (quality_threshold)  
+GC-composition (gc_bounds)  
+Implemented via:  
+Bio.SeqIO.parse, Bio.SeqIO.write  
+Bio.SeqUtils.gc_fraction  
+qualities are taken from record.letter_annotations["phred_quality"]
+
+## Usage examples
 ```python
-run_dna_rna_tools('ATGC', 'is_nucleic_acid') # True
-run_dna_rna_tools('AGU', 'CCuu' 'transcribe') # ['AGT', 'CCtt']
-run_dna_rna_tools('ATg', 'reverse') # 'gTA'
-run_dna_rna_tools('ctA', 'complement') # 'gaT'
-run_dna_rna_tools('ATg', 'reverse_complement') # 'cAT'
-```
+dna = DNASequence('ATGCCGTA')
+print(dna)                 # DNASequence(len=8, seq='ATGCCGTA')
+print(dna[0])              # 'A'
+print(dna[2:6])            # DNASequence(len=4, seq='GCCG')
 
-## Function `filter_fastq`
+dna = DNASequence('ATGC')
+print(dna.complement())    # DNASequence(len=4, seq='TACG')
+print(dna.reverse())       # DNASequence(len=4, seq='CGTA')
+print(dna.reverse_complement()) # DNASequence(len=4, seq='GCAT')
 
-Function works with sequences in the **fastq** format. Allows to filter them by GC composition, reading length, and read quality on the Phred33 scale.
+rna = dna.transcribe()
+print(rna)                 # RNASequence('AUGC)
 
-The **filter_fastq** function accepts 5 arguments as input:
-1. The name of the file with fastq format sequences.
-2. The name of the file where the result will be recorded.
-3. Interval (tuple of two values) or GC value (`float') of the composition (in percent) for filtering. In the case of a single border, all reads below this border are filtered (saved).
-4. The interval (tuple of two values) or the value (`float`) of the reed length for filtering. In the case of a single border, all reads below that border are filtered.
-5. The threshold value of the average read quality for filtering (`int`). Reads with quality below the threshold value are discarded.
-
-Saves fastq sequence strings filtered by the set parameters.
-
-```python
-filter_fastq(
-    input_fastq: str,
-    output_fastq: str,
-    gc_bounds: tuple[float, float] | float = (0, 100),
-    length_bounds: tuple[int, int] | int = (0, 2**32),
-    quality_threshold: float = 0)
-```
-
-**Usage Example**
-```python
-filter_fastq('input_fastq', 'output_fastq', gc_bounds = (0,100),        length_bounds = (0,2**32), quality_threshold = 0)
-```
-
-## Function `convert_multiline_fasta_to_oneline`
-
-Function reads the input fasta file, in which the sequence (DNA/RNA/protein) can be split into several lines, and then saves it to a new fasta file in which each sequence fits into one line.
-
-Accepts 2 arguments as input (input_fasta and output_fasta). output_fasta optional argument, if not specified, returns a list.
-
-```python
-convert_multiline_fasta_to_oneline(input_fasta: str, output_fasta: str ='') -> list[str]
-```
-
-## Function `parse_blast_output`
-
-The program reads the preset txt file, selects the first row from the Description column for each QUERY (paragraph Sequences producing significant alignments:). The set of obtained proteins is saved in alphabetical order to a new file.
-
-Accepts 2 arguments as input (input_file, output_file). 
-
-```python
-parse_blast_output(input_file: str, output_file: str) -> None
+dna = DNASequence("ATGAAAATA")   # ATG AAA ATA -> M K I
+protein = AminoAcidSequence.translate_aa(dna)
+print(protein.seq)               # "MKI"
 ```
